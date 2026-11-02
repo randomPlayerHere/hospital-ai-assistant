@@ -7,14 +7,28 @@ Caddy (80/443, automatic Let's Encrypt certificates) routes `/api/*`, `/healthz`
 
 ## 1. First-time setup (new server)
 1. Create a VM (Ubuntu 22.04/24.04, 2 vCPU / 4 GB is enough for a small clinic) and point DNS `A`/`AAAA` for your domain at it.
-2. As root: `curl -fsSL https://raw.githubusercontent.com/<you>/<repo>/main/infra/scripts/provision.sh | bash` (or copy and run it). It installs Docker, enables the firewall (only 22/80/443), fail2ban, unattended upgrades, key-only SSH, log rotation, and the 02:17 UTC backup cron. **Keep a second SSH session open while it changes sshd.**
-3. Add the CI deploy public key to `/home/deploy/.ssh/authorized_keys`. Clone the repo to `/opt/hospital` (owned by `deploy`).
-4. `cp .env.prod.example .env.prod && chmod 600 .env.prod` and fill it in: `DOMAIN`, `ACME_EMAIL`, `GHCR_OWNER`, strong random `SECRET_KEY`, `FIELD_ENCRYPTION_KEY` (`python3 -c "import base64,os;print(base64.urlsafe_b64encode(os.urandom(32)).decode())"`), DB passwords (and the two DB URLs), `ANTHROPIC_API_KEY`, SMTP settings (`EMAIL_BACKEND=smtp`), `ADMIN_EMAIL`/`ADMIN_PASSWORD`, `BACKUP_AGE_RECIPIENT`.
+2. Copy `infra/scripts/provision.sh` to the server and run as root:
+   ```bash
+   scp infra/scripts/provision.sh root@<server-ip>:/tmp/provision.sh
+   ssh root@<server-ip> "bash /tmp/provision.sh && rm /tmp/provision.sh"
+   ```
+   *(Note: because the repository is private, raw `curl` commands cannot fetch it without auth).*
+   The script installs Docker, sets up firewall rules (22/80/443), fail2ban, unattended upgrades, key-only SSH, log rotation, and the 02:17 UTC backup cron. **Keep a second SSH session open while it changes sshd.**
+3. **Configure private repository access and CI keys:**
+   - **GitHub Deploy Key (read-only):** The provision script automatically generates a dedicated ed25519 deploy key in `/home/deploy/.ssh/id_ed25519.pub` and pre-populates `github.com` in `known_hosts`. Copy this public key and paste it into **GitHub → Repo → Settings → Deploy Keys** (leave *Allow write access* unchecked).
+   - **CI Deployment Access:** Generate an SSH keypair on your local machine for GitHub Actions (or use an existing deployment key). Append the public key to `/home/deploy/.ssh/authorized_keys` on the server.
+   - **Initial clone:** As the `deploy` user, clone the repo into `/opt/hospital`:
+     ```bash
+     sudo -u deploy git clone git@github.com:<owner>/<repo>.git /opt/hospital
+     ```
+4. `cp .env.prod.example .env.prod && chmod 600 .env.prod` in `/opt/hospital` and fill it in: `DOMAIN`, `ACME_EMAIL`, `GHCR_OWNER`, strong random `SECRET_KEY`, `FIELD_ENCRYPTION_KEY` (`python3 -c "import base64,os;print(base64.urlsafe_b64encode(os.urandom(32)).decode())"`), DB passwords (and the two DB URLs), `ANTHROPIC_API_KEY`, SMTP settings (`EMAIL_BACKEND=smtp`), `ADMIN_EMAIL`/`ADMIN_PASSWORD`, `BACKUP_AGE_RECIPIENT`.
    - **Back up `FIELD_ENCRYPTION_KEY` and the age private key somewhere safe and separate from the server.** Losing either means unrecoverable data / backups.
-5. GitHub repo settings → Secrets (environment `production`): `DEPLOY_HOST`, `DEPLOY_USER`, `DEPLOY_SSH_KEY`, `GHCR_READ_TOKEN` (PAT with `read:packages`).
+5. GitHub repo settings → Secrets (environment `production` or Repository Secrets): `DEPLOY_HOST`, `DEPLOY_USER`, `DEPLOY_SSH_KEY` (private key matching `authorized_keys`), `GHCR_READ_TOKEN` (PAT with `read:packages`).
 6. Seed the first admin and reference data (no demo data in prod because `ENVIRONMENT=prod`):
-   `IMAGE_TAG=<tag> docker compose -f docker-compose.prod.yml --env-file ../.env.prod run --rm backend python -m app.seed`
-   then log in and **change the admin password immediately**. Create doctors (Admin → Users, role Doctor) and have them set their weekly availability (Doctor → Availability & leave).
+   ```bash
+   IMAGE_TAG=<tag> docker compose -f docker-compose.prod.yml --env-file ../.env.prod run --rm backend python -m app.seed
+   ```
+   then log in and **change the admin password immediately** (`/change-password`). Create doctors (Admin → Users, role Doctor) and have them set their weekly availability (Doctor → Availability & leave).
 7. Deploy (section 2). The smoke test needs at least one doctor with availability.
 
 ## 2. Deploy
@@ -55,7 +69,23 @@ Caddy retries upstreams for up to 15 s, so a rolling restart is normally invisib
 **Reminders not sending**: `docker compose logs worker`; the job is idempotent (dedupe keys in `notifications`), so restarting the worker never double-sends.
 
 ## 7. Routine maintenance
-Weekly: check backups exist off-host and the disk has space. Monthly: restore test, `pip-audit`/`npm audit` (CI does it on every push), rotate admin passwords, review users. Quarterly: rotate `SECRET_KEY`/DB passwords, review audit logs for unusual access, update base images (rebuild + deploy).
+- **Weekly**: Check backups exist off-host (`BACKUP_S3_URI`) and disk has space (`df -h`). Run token purge:
+  ```bash
+  docker compose -f docker-compose.prod.yml --env-file ../.env.prod run --rm backend python -m app.scripts.purge_data --purge-expired-tokens
+  ```
+- **Monthly**: Run backup restore test (`restore-test.sh`). Check `pip-audit` and `npm audit`. Run cryptographic audit chain verification:
+  ```bash
+  docker compose -f docker-compose.prod.yml --env-file ../.env.prod run --rm backend python -m app.scripts.verify_audit_chain
+  ```
+- **Quarterly**: Review administrative accounts and MFA enrollments. Review audit logs for anomalous cross-patient queries.
+- **Key Rotation**: When rotating `FIELD_ENCRYPTION_KEY`, run transactional re-encryption:
+  ```bash
+  docker compose -f docker-compose.prod.yml --env-file ../.env.prod run --rm backend python -m app.scripts.rotate_encryption_key --old-key <old> --new-key <new>
+  ```
+- **Permanent Purge**: Execute statutory clinical data retention purge on aged soft-deleted patient records (e.g. older than 30 days post-erasure):
+  ```bash
+  docker compose -f docker-compose.prod.yml --env-file ../.env.prod run --rm backend python -m app.scripts.purge_data --purge-soft-deleted-older-than-days 30
+  ```
 
 ## 8. Rehearse locally (what was verified)
 `infra/docker-compose.rehearsal.yml` runs the *production* compose file on unprivileged ports with Caddy's internal CA:

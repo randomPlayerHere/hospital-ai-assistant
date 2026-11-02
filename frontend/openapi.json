@@ -3452,6 +3452,158 @@
      }
     }
    }
+  },
+  "/api/auth/change-password": {
+   "post": {
+    "tags": [
+     "auth"
+    ],
+    "summary": "Change Password",
+    "operationId": "change_password_api_auth_change_password_post",
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/ChangePasswordRequest"
+       }
+      }
+     },
+     "required": true
+    },
+    "responses": {
+     "204": {
+      "description": "Successful Response"
+     },
+     "422": {
+      "description": "Validation Error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/api/auth/mfa/verify-login": {
+   "post": {
+    "tags": [
+     "auth"
+    ],
+    "summary": "Verify MFA Login",
+    "operationId": "verify_mfa_login_api_auth_mfa_verify_login_post",
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/MFAVerifyLoginRequest"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/TokenPair"
+        }
+       }
+      }
+     },
+     "401": {
+      "description": "Invalid MFA Code or Ticket"
+     }
+    }
+   }
+  },
+  "/api/auth/mfa/setup": {
+   "post": {
+    "tags": [
+     "auth"
+    ],
+    "summary": "Setup MFA",
+    "operationId": "setup_mfa_api_auth_mfa_setup_post",
+    "responses": {
+     "200": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/MFASetupResponse"
+        }
+       }
+      }
+     }
+    },
+    "security": [
+     {
+      "OAuth2PasswordBearer": []
+     }
+    ]
+   }
+  },
+  "/api/auth/mfa/enable": {
+   "post": {
+    "tags": [
+     "auth"
+    ],
+    "summary": "Enable MFA",
+    "operationId": "enable_mfa_api_auth_mfa_enable_post",
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/MFAEnableRequest"
+       }
+      }
+     }
+    },
+    "responses": {
+     "204": {
+      "description": "Successful Response"
+     }
+    },
+    "security": [
+     {
+      "OAuth2PasswordBearer": []
+     }
+    ]
+   }
+  },
+  "/api/auth/mfa/disable": {
+   "post": {
+    "tags": [
+     "auth"
+    ],
+    "summary": "Disable MFA",
+    "operationId": "disable_mfa_api_auth_mfa_disable_post",
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/MFADisableRequest"
+       }
+      }
+     }
+    },
+    "responses": {
+     "204": {
+      "description": "Successful Response"
+     }
+    },
+    "security": [
+     {
+      "OAuth2PasswordBearer": []
+     }
+    ]
+   }
   }
  },
  "components": {
@@ -5092,23 +5244,32 @@
     "properties": {
      "access_token": {
       "type": "string",
-      "title": "Access Token"
+      "title": "Access Token",
+      "nullable": true
      },
      "refresh_token": {
       "type": "string",
-      "title": "Refresh Token"
+      "title": "Refresh Token",
+      "nullable": true
      },
      "token_type": {
       "type": "string",
       "title": "Token Type",
       "default": "bearer"
+     },
+     "mfa_required": {
+      "type": "boolean",
+      "title": "MFA Required",
+      "default": false
+     },
+     "mfa_ticket": {
+      "type": "string",
+      "title": "MFA Ticket",
+      "nullable": true
      }
     },
     "type": "object",
-    "required": [
-     "access_token",
-     "refresh_token"
-    ],
+    "required": [],
     "title": "TokenPair"
    },
    "TriageOut": {
@@ -5247,6 +5408,11 @@
      "is_active": {
       "type": "boolean",
       "title": "Is Active"
+     },
+     "mfa_enabled": {
+      "type": "boolean",
+      "title": "MFA Enabled",
+      "default": false
      }
     },
     "type": "object",
@@ -5755,6 +5921,104 @@
      "status"
     ],
     "title": "WaitlistOut"
+   },
+   "ChangePasswordRequest": {
+    "properties": {
+     "current_password": {
+      "type": "string",
+      "title": "Current Password"
+     },
+     "new_password": {
+      "type": "string",
+      "maxLength": 128,
+      "minLength": 12,
+      "title": "New Password"
+     }
+    },
+    "type": "object",
+    "required": [
+     "current_password",
+     "new_password"
+    ],
+    "title": "ChangePasswordRequest"
+   },
+   "MFAVerifyLoginRequest": {
+    "type": "object",
+    "required": [
+     "mfa_ticket",
+     "code"
+    ],
+    "properties": {
+     "mfa_ticket": {
+      "type": "string",
+      "title": "MFA Ticket"
+     },
+     "code": {
+      "type": "string",
+      "title": "Code",
+      "minLength": 6,
+      "maxLength": 6
+     }
+    },
+    "title": "MFAVerifyLoginRequest"
+   },
+   "MFASetupResponse": {
+    "type": "object",
+    "required": [
+     "secret",
+     "otpauth_url"
+    ],
+    "properties": {
+     "secret": {
+      "type": "string",
+      "title": "Secret"
+     },
+     "otpauth_url": {
+      "type": "string",
+      "title": "OTPAuth URL"
+     }
+    },
+    "title": "MFASetupResponse"
+   },
+   "MFAEnableRequest": {
+    "type": "object",
+    "required": [
+     "secret",
+     "code"
+    ],
+    "properties": {
+     "secret": {
+      "type": "string",
+      "title": "Secret"
+     },
+     "code": {
+      "type": "string",
+      "title": "Code",
+      "minLength": 6,
+      "maxLength": 6
+     }
+    },
+    "title": "MFAEnableRequest"
+   },
+   "MFADisableRequest": {
+    "type": "object",
+    "required": [
+     "password",
+     "code"
+    ],
+    "properties": {
+     "password": {
+      "type": "string",
+      "title": "Password"
+     },
+     "code": {
+      "type": "string",
+      "title": "Code",
+      "minLength": 6,
+      "maxLength": 6
+     }
+    },
+    "title": "MFADisableRequest"
    }
   },
   "securitySchemes": {

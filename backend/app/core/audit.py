@@ -1,10 +1,15 @@
+import hashlib
+import json
 import logging
 import re
 import uuid
+from pathlib import Path
 
 import jwt
+from sqlalchemy import select
 from starlette.types import ASGIApp, Message, Receive, Scope, Send
 
+from app.core.config import get_settings
 from app.core.db import AuditSessionLocal
 from app.core.tokens import decode_access_token
 from app.models import AuditLog
@@ -22,10 +27,31 @@ def _parse_resource(path: str) -> tuple[str, str | None]:
     return "/".join(names) or "unknown", resource_id
 
 
+def compute_entry_hash(
+    prev_hash: str | None,
+    user_id: uuid.UUID | None,
+    role: str | None,
+    action: str,
+    resource_type: str,
+    resource_id: str | None,
+    method: str,
+    path: str,
+    status_code: int,
+    ip: str | None,
+    request_id: str | None,
+) -> str:
+    raw = (
+        f"{prev_hash or 'GENESIS'}|{user_id}|{role}|{action}|{resource_type}|"
+        f"{resource_id}|{method}|{path}|{status_code}|{ip}|{request_id}"
+    )
+    return hashlib.sha256(raw.encode("utf-8")).hexdigest()
+
+
 class AuditMiddleware:
     """Records every /api request (user, action, resource, status, IP) in audit_logs.
 
     Pure ASGI: the row is written after the response has been sent, so it adds no client latency.
+    Includes cryptographic hash chaining and optional append-only file streaming.
     """
 
     def __init__(self, app: ASGIApp) -> None:
@@ -63,11 +89,33 @@ class AuditMiddleware:
         method = scope["method"]
         action = "auth" if resource.startswith("auth") else _ACTIONS.get(method, "read")
         client = scope.get("client")
-        # scope["client"] is rewritten by uvicorn from trusted proxy headers only
-        # (--forwarded-allow-ips); reading X-Forwarded-For here would let callers forge the audited IP.
         ip = client[0] if client else None
+        req_id = scope.get("state", {}).get("request_id")
+
         try:
+            s = get_settings()
             async with AuditSessionLocal() as db:
+                latest = (
+                    await db.execute(
+                        select(AuditLog.entry_hash).order_by(AuditLog.id.desc()).limit(1)
+                    )
+                ).scalar_one_or_none()
+                prev_hash = latest
+
+                entry_hash = compute_entry_hash(
+                    prev_hash=prev_hash,
+                    user_id=user_id,
+                    role=role,
+                    action=action,
+                    resource_type=resource,
+                    resource_id=resource_id,
+                    method=method,
+                    path=path[:300],
+                    status_code=status_code,
+                    ip=ip,
+                    request_id=req_id,
+                )
+
                 db.add(
                     AuditLog(
                         user_id=user_id,
@@ -79,10 +127,33 @@ class AuditMiddleware:
                         path=path[:300],
                         status_code=status_code,
                         ip=ip,
-                        request_id=scope.get("state", {}).get("request_id"),
+                        request_id=req_id,
+                        prev_hash=prev_hash,
+                        entry_hash=entry_hash,
                     )
                 )
                 await db.commit()
+
+            # Optional external streaming (append-only JSONL log file for write-once / external SIEM collector)
+            if s.audit_log_stream_path:
+                payload = {
+                    "user_id": str(user_id) if user_id else None,
+                    "role": role,
+                    "action": action,
+                    "resource_type": resource,
+                    "resource_id": resource_id,
+                    "method": method,
+                    "path": path[:300],
+                    "status_code": status_code,
+                    "ip": ip,
+                    "request_id": req_id,
+                    "prev_hash": prev_hash,
+                    "entry_hash": entry_hash,
+                }
+                p = Path(s.audit_log_stream_path)
+                p.parent.mkdir(parents=True, exist_ok=True)
+                with p.open("a", encoding="utf-8") as f:
+                    f.write(json.dumps(payload) + "\n")
         except Exception:
             # Never break the user's request, but make the gap visible to operators.
             log.exception("audit log write failed")

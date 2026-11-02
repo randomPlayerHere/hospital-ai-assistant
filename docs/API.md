@@ -48,6 +48,7 @@ Generated from the OpenAPI schema (`make api-docs`). Interactive docs: `/docs` (
 | GET | `/api/auth/me` | Me | bearer |
 | POST | `/api/auth/refresh` | Refresh | public |
 | POST | `/api/auth/register` | Register | public |
+| POST | `/api/auth/change-password` | Change Password | bearer |
 | POST | `/api/auth/reset-password` | Reset Password | public |
 
 ## documents

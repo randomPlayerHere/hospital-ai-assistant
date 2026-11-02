@@ -17,18 +17,21 @@ flowchart LR
 ```
 
 ## Backend layout (`backend/app`)
-- `api/` routers: `auth`, `admin`, `analytics`, `patients`, `visits` (visits, prescriptions, versions), `documents`, `scheduling` (doctors, availability, slots, appointments, waitlist), `search`, `ai`, `health`.
-- `core/`: config, DB sessions (separate small pool for audit writes), security (argon2id, JWT), RBAC dependencies, audit + request-context ASGI middleware, rate limiting, field encryption.
-- `services/`: access control (`access.py` is the single place for object-level authorization), scheduling engine, auth flows, storage, virus-scan hook, notifications, versioning.
-- `ai/`: `client.py` (LLM wrapper: timeout, retry/backoff, circuit breaker, usage logging), `prompts/*.vN.md` (versioned prompts), `redflags.py` (rule-based emergency detection), `triage.py`, `booking.py` (read-only tools + confirmation), `summarize.py`, `faq.py` (TF-IDF retrieval), `guards.py` (no diagnosis/medication), `pii.py`, `structured.py` (JSON + Pydantic validation, one retry), `evals/`.
+- `api/` routers: `auth` (login, register, MFA, password reset/change), `admin` (users, departments, patient export/erasure), `analytics`, `patients`, `visits` (visits, prescriptions, version history), `documents`, `scheduling` (doctors, availability, slot-config, appointments, waitlist), `search`, `ai` (triage, booking assistant, FAQ, briefings), `health`.
+- `core/`: config, DB sessions (dedicated connection pool for audit writes), security (argon2id, JWT), RBAC dependencies, tamper-proof audit log cryptographic hash chaining (`prev_hash` -> `entry_hash`), external JSONL streaming, rate limiting, field encryption.
+- `services/`: access control (`access.py` centralized object-level authorization), scheduling engine, auth flows (cookie-based refresh token rotation), Multi-Factor Authentication (`mfa.py` RFC 6238 TOTP), storage (local / S3 with ServerSideEncryption AES256), virus-scanner (`scan.py` with ClamAV clamd daemon streaming protocol), notifications, versioning.
+- `ai/`: `client.py` (LLM wrapper: timeout, retry/backoff, circuit breaker, usage logging), `prompts/*.vN.md` (versioned prompts), `redflags.py` (deterministic rule-based emergency detection), `triage.py`, `booking.py` (read-only tools + confirmation gate), `summarize.py`, `faq.py` (in-memory TF-IDF retrieval), `guards.py` (no diagnosis/medication filter), `pii.py`, `structured.py` (JSON + Pydantic validation), `evals/` (60 clinical test cases, report generator).
+- `scripts/`: operational CLIs: `verify_audit_chain.py` (cryptographic audit verification), `rotate_encryption_key.py` (transactional field encryption re-keying), `purge_data.py` (data retention policy & permanent purge).
 - `jobs/`: reminder job (24 h / 2 h, idempotent) and the APScheduler worker.
 
 ## Key design points
 - **No double booking**: booking takes a row lock on the doctor, re-checks the generated slot, and the database enforces it with a GiST exclusion constraint on `(doctor_id, tstzrange(starts_at, ends_at))` for active appointments. Verified with 50 parallel requests for one slot (exactly one 201, forty-nine 409).
 - **Idempotency**: `Idempotency-Key` header on booking, unique per user.
-- **Least privilege**: clinical data is limited to the patient and doctors with a relationship; reception sees demographics/documents; admin sees analytics/audit but not clinical notes. DB runtime role has DML only.
-- **Auditability**: every `/api` request is recorded with user, role, action, resource, status, IP, request id; record edits create immutable versions.
-- **AI safety**: rules before model; guarded outputs; PII minimised; confirmation before any booking; degraded modes when the AI is unavailable.
+- **Least privilege & Access Control**: clinical data is limited to the patient and doctors with an appointment relationship; reception sees demographics/documents; admin sees analytics/audit but not clinical notes. DB runtime role has DML only.
+- **Auditability & Tamper-Proofing**: every `/api` request is recorded with user, role, action, resource, status, IP, request id. Audit logs form a cryptographic SHA-256 hash chain and can stream to append-only storage for SIEM integration.
+- **Multi-Factor Authentication (MFA)**: RFC 6238 TOTP supported for all roles, with signed login challenge tickets and replay prevention.
+- **Browser Hardening**: Per-request cryptographic nonces in Content Security Policy (`strict-dynamic`); rotating refresh tokens stored in secure, `httpOnly`, `SameSite=Lax` cookies.
+- **AI safety**: deterministic red-flag rules run before and independently of the model (100% emergency recall); output guard filters diagnoses/medication; PII minimised; booking proposals require explicit patient confirmation; resilient fallback modes when AI is unavailable.
 
 ## ER diagram
 ```mermaid

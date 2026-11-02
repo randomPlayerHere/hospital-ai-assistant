@@ -13,12 +13,7 @@ from collections import Counter
 from datetime import UTC, datetime
 from pathlib import Path
 
-from app.ai.client import AnthropicLLM, ai_configured
-from app.ai.guards import violates_safety
-from app.ai.prompts import load_prompt
 from app.ai.redflags import detect_red_flags
-from app.ai.structured import complete_json
-from app.schemas.ai import TriageLLMOutput
 
 HERE = Path(__file__).parent
 DEPARTMENTS = [
@@ -51,6 +46,12 @@ def rule_results(cases: list[dict]) -> dict:
 
 
 async def live_results(cases: list[dict]) -> dict:
+    from app.ai.client import AnthropicLLM
+    from app.ai.guards import violates_safety
+    from app.ai.prompts import load_prompt
+    from app.ai.structured import complete_json
+    from app.schemas.ai import TriageLLMOutput
+
     llm = AnthropicLLM()
     prompt = load_prompt("triage")
     rows = []
@@ -157,6 +158,7 @@ async def main(live: bool) -> None:
     rules = rule_results(cases)
     live_res = None
     if live:
+        from app.ai.client import ai_configured
         if not ai_configured():
             raise SystemExit("ANTHROPIC_API_KEY not configured; cannot run --live")
         live_res = await live_results(cases)

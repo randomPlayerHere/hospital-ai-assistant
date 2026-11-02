@@ -24,12 +24,14 @@ test("reception registers a patient, finds them, books and cancels via the calen
   await page.getByLabel("Doctor").selectOption({ label: "Dr. Vikram Shah (General Medicine)" });
   await page.getByLabel("Find patient (name, phone)").fill(last);
   await page.getByLabel("Patient", { exact: true }).selectOption({ index: 1 });
-  // advance until a day with free slots exists (weekends have none)
+  // switch to Day view and advance day-by-day until a day with free slots exists (weekends have none)
+  await page.getByRole("button", { name: "Day" }).click();
   for (let i = 0; i < 8; i++) {
     const slot = page.getByRole("button", { name: /^\d\d:\d\d$/ }).first();
-    if (await slot.isVisible().catch(() => false)) break;
-    await page.getByRole("button", { name: "Next week" }).click();
-    await page.getByRole("button", { name: "Day" }).click();
+    const noSlots = page.getByText("No free slots this day.");
+    await expect(slot.or(noSlots)).toBeVisible();
+    if (await slot.isVisible()) break;
+    await page.getByRole("button", { name: "Next day" }).click();
   }
   await page
     .getByRole("button", { name: /^\d\d:\d\d$/ })

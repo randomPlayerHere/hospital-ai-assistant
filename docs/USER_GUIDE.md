@@ -21,12 +21,16 @@ Reminders are sent 24 hours and 2 hours before each appointment.
 
 ## Doctors
 - **My schedule**: day/week calendar of your appointments; open the chart, mark completed / no-show.
-- **Availability & leave**: set weekly working windows and add leave/holiday ranges (existing bookings are not cancelled automatically).
+- **Availability & leave**: set weekly working windows, add leave/holiday ranges, and customize **Slot duration settings** (10-120 minutes) via the Slot Settings form.
 - **My patients**: patients with an appointment or visit with you; a full-text **records search** across your visit notes.
-- **Patient chart**: **Pre-visit AI briefing** (overview, flagged items such as allergies and overdue follow-ups, key history, recent visits; regenerate any time; if the AI service is down you get a structured overview from the record), **Add visit note** (complaint, vitals, notes, your diagnosis, prescription, follow-up date), visit history. Edits are versioned; every change is attributable.
+- **Patient chart**: **Pre-visit AI briefing** (overview, flagged items such as allergies and overdue follow-ups, key history, recent visits; regenerate any time; if the AI service is down you get a structured overview from the record), **Add visit note** (complaint, vitals, notes, your diagnosis, prescription, follow-up date), and **Visit edit history** (expandable version timeline showing all edits, snapshots, and timestamps).
 
 ## Admin
 - **Dashboard**: appointments per day, no-show rate, average booking lead time, department load, AI assistant usage; date range filter; **CSV export**.
 - **Users**: create staff/doctor/admin accounts (doctors need a department), activate/deactivate accounts, add departments.
-- **Audit logs**: every API access with user, role, action, resource, status and IP; filter by resource, action and dates.
-- Data-subject tools (API): patient export and erasure request under `/api/admin/patients/{id}/…` (see `docs/API.md`).
+- **Patients Management**: view patient registry with **Export patient data** (download complete clinical and demographic JSON record) and **Request erasure** (with irreversible confirmation modal).
+- **Audit logs**: every API access with user, role, action, resource, status and IP; filter by resource, action and dates. Cryptographic verification runs via `verify_audit_chain` CLI.
+
+## Account & Security Settings (All Roles)
+- **Multi-Factor Authentication (MFA)**: Navigate to `/mfa` from the sidebar to set up RFC 6238 TOTP (Google Authenticator, Authy, 1Password) with secret key and verification code.
+- **Change Password**: Navigate to `/change-password` from the sidebar to update your account password at any time.

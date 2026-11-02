@@ -1,0 +1,4 @@
+# Ensure shell scripts always keep LF endings in Linux containers
+*.sh text eol=lf
+Dockerfile text eol=lf
+Caddyfile text eol=lf

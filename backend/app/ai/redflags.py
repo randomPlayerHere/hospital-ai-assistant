@@ -30,14 +30,15 @@ RED_FLAGS: list[RedFlag] = [
         "chest_pain",
         "Chest pain or pressure",
         r"chest\s+(pain|pressure|tightness|discomfort|heaviness)|pain\s+(in|across)\s+(my\s+|the\s+)?chest|"
-        r"crushing\s+(pain|feeling)|heart\s+attack|squeezing\s+(in|around)\s+(my\s+)?chest|pain\s+radiating\s+(to|down)\s+(my\s+)?(left\s+)?arm",
+        r"crushing\s+(pain|feeling)|heart\s+attack|squeezing\s+(in|around)\s+(my\s+)?chest|pain\s+radiating\s+(to|down)\s+(my\s+)?(left\s+)?arm|"
+        r"(tearing|ripping)\s+(pain|sensation|feeling)",
     ),
     _r(
         "stroke",
         "Possible stroke signs",
         r"\bstroke\b|(face|facial|mouth)\s+(is\s+)?(droop|drooping|numb|sagging)|slurr(ed|ing)|speech\s+(is\s+|has\s+become\s+)?(garbled|jumbled|affected)|\bdroop|numbness\s+(in|on)\s+(my\s+|the\s+|his\s+|her\s+)?(face|one\s+side)|"
         r"(can'?t|cannot|unable\s+to|trouble)\s+(speak|talk|understand|find\s+words)|"
-        r"sudden(ly)?\s+(weak|weakness|numb|numbness|confus|lost\s+(my\s+)?vision|can'?t\s+see|blind|dizz)|"
+        r"sudden(ly)?\s+.{0,30}(weak|weakness|numb|numbness|confus|lost\s+(my\s+)?vision|loss\s+of\s+vision|can'?t\s+see|blind|dizz)|"
         r"one\s+side\s+of\s+(my|the|his|her)\s+(body|face)|(arm|leg)\s+(suddenly\s+)?(weak|numb|won'?t\s+move)|"
         r"worst\s+headache\s+of\s+(my|his|her)\s+life|thunderclap",
     ),
@@ -53,13 +54,13 @@ RED_FLAGS: list[RedFlag] = [
         "Severe breathing difficulty",
         rf"(can'?t|cannot|unable\s+to|struggling\s+to|hard\s+to|difficulty|trouble|not\s+able\s+to)\s+{_BREATH}|"
         rf"severe\s+shortness\s+of\s+breath|short(ness)?\s+of\s+breath\s+(at\s+rest|and\s+(blue|chest))|gasping|"
-        r"choking|turning\s+blue|blue\s+(lips|face|skin)|stopped\s+breathing|not\s+breathing",
+        r"choking|turning\s+blue|blue\s+(lips|face|skin)|stopped\s+breathing|not\s+breathing|stridor|drooling.{0,30}(swallow|breath)",
     ),
     _r(
         "unconscious",
         "Loss of consciousness or seizure",
         r"unconscious|passed\s+out|blacked\s+out|unresponsive|not\s+responding|won'?t\s+wake|seizure|convuls|"
-        r"fainted|collapsed|fitting",
+        r"fainted|collapsed|fitting|loss\s+of\s+consciousness|lost\s+consciousness",
     ),
     _r(
         "self_harm",
@@ -75,13 +76,13 @@ RED_FLAGS: list[RedFlag] = [
     _r(
         "poisoning",
         "Poisoning or overdose",
-        r"poison|swallowed\s+(bleach|cleaning|pills|battery|chemical)|drank\s+(bleach|antifreeze)|took\s+too\s+many\s+(pills|tablets)",
+        r"poison|swallowed\s+(bleach|cleaning|pills|battery|chemical)|drank\s+(bleach|antifreeze)|took\s+too\s+many\s+(pills|tablets)|carbon\s+monoxide",
     ),
     _r(
         "trauma",
         "Serious injury",
         r"gunshot|shot\s+in|stabbed|stab\s+wound|severe\s+(head|burn|trauma)|head\s+injury.{0,60}(vomit|drows|unconscious|confus)|"
-        r"(car|road|motorbike|bike)\s+(accident|crash)|fell\s+from\s+(a\s+)?(height|roof|ladder)|compound\s+fracture|bone\s+(is\s+)?(sticking|poking)\s+out",
+        r"(car|road|motorbike|bike)\s+(accident|crash)|fell\s+(from|off)\s+(a\s+)?(height|roof|ladder|stairs)|compound\s+fracture|bone\s+(is\s+)?(sticking|poking)\s+out",
     ),
     _r(
         "infant",
@@ -97,6 +98,11 @@ RED_FLAGS: list[RedFlag] = [
         "meningitis",
         "Possible meningitis",
         r"stiff\s+neck.{0,60}(fever|rash|light|headache)|(fever|rash).{0,60}stiff\s+neck",
+    ),
+    _r(
+        "sepsis",
+        "Possible sepsis or septic shock",
+        r"\bsepsis\b|\bseptic\b|mottled\s+skin|(shivering|rigors).{0,40}(fever|confus)|(fever|confus).{0,40}(shivering|rigors)|(confusion|confused).{0,40}(fever|temperature)",
     ),
 ]
 

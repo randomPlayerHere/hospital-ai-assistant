@@ -22,9 +22,11 @@ function store(): Storage | null {
   }
 }
 
-export function setTokens(pair: { access_token: string; refresh_token: string }) {
-  accessToken = pair.access_token;
-  store()?.setItem(REFRESH_KEY, pair.refresh_token);
+export function setTokens(pair: { access_token?: string | null; refresh_token?: string | null }) {
+  if (pair.access_token && pair.refresh_token) {
+    accessToken = pair.access_token;
+    store()?.setItem(REFRESH_KEY, pair.refresh_token);
+  }
 }
 
 export function clearTokens() {
@@ -44,13 +46,13 @@ export function hasAccessToken() {
 export function refreshTokens(): Promise<boolean> {
   if (refreshing) return refreshing;
   const refresh = getRefreshToken();
-  if (!refresh) return Promise.resolve(false);
   refreshing = (async () => {
     try {
       const res = await fetch(`${API_URL}/api/auth/refresh`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ refresh_token: refresh }),
+        credentials: "include",
+        body: JSON.stringify(refresh ? { refresh_token: refresh } : {}),
       });
       if (!res.ok) {
         clearTokens();
@@ -70,12 +72,12 @@ export function refreshTokens(): Promise<boolean> {
 async function authFetch(req: Request): Promise<Response> {
   const retry = req.clone();
   if (accessToken) req.headers.set("Authorization", `Bearer ${accessToken}`);
-  const res = await fetch(req);
+  const res = await fetch(req, { credentials: "include" });
   const isAuthCall = new URL(req.url).pathname.startsWith("/api/auth/");
   if (res.status === 401 && !isAuthCall) {
     if (await refreshTokens()) {
       retry.headers.set("Authorization", `Bearer ${accessToken}`);
-      return fetch(retry);
+      return fetch(retry, { credentials: "include" });
     }
     onLoggedOut?.();
   }

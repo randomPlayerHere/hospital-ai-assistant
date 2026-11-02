@@ -1,261 +1,422 @@
 [
- {
-  "id": "e01",
-  "message": "I have crushing chest pain that goes down my left arm and I'm sweating",
-  "age": 58,
-  "expected_urgency": "emergency",
-  "expected_department": "Emergency"
- },
- {
-  "id": "e02",
-  "message": "My father's face is drooping on one side and his speech is slurred",
-  "age": 70,
-  "expected_urgency": "emergency",
-  "expected_department": "Emergency"
- },
- {
-  "id": "e03",
-  "message": "I cut my leg badly and the bleeding won't stop even with pressure",
-  "age": 34,
-  "expected_urgency": "emergency",
-  "expected_department": "Emergency"
- },
- {
-  "id": "e04",
-  "message": "I can't breathe properly, I'm gasping and my lips are turning blue",
-  "age": 45,
-  "expected_urgency": "emergency",
-  "expected_department": "Emergency"
- },
- {
-  "id": "e05",
-  "message": "My son had a seizure and is not responding to us",
-  "age": 8,
-  "expected_urgency": "emergency",
-  "expected_department": "Emergency"
- },
- {
-  "id": "e06",
-  "message": "I want to kill myself, I have pills in my hand",
-  "age": 29,
-  "expected_urgency": "emergency",
-  "expected_department": "Emergency"
- },
- {
-  "id": "e07",
-  "message": "My throat is closing up after eating peanuts and my tongue is swelling",
-  "age": 22,
-  "expected_urgency": "emergency",
-  "expected_department": "Emergency"
- },
- {
-  "id": "e08",
-  "message": "I passed out at work and woke up on the floor, now I have chest tightness",
-  "age": 51,
-  "expected_urgency": "emergency",
-  "expected_department": "Emergency"
- },
- {
-  "id": "e09",
-  "message": "I'm vomiting blood and feel very dizzy",
-  "age": 47,
-  "expected_urgency": "emergency",
-  "expected_department": "Emergency"
- },
- {
-  "id": "e10",
-  "message": "My 3-week-old baby has a fever and is hard to wake up",
-  "age": 0,
-  "expected_urgency": "emergency",
-  "expected_department": "Emergency"
- },
- {
-  "id": "e11",
-  "message": "I suddenly lost vision in one eye and can't move my arm",
-  "age": 66,
-  "expected_urgency": "emergency",
-  "expected_department": "Emergency"
- },
- {
-  "id": "e12",
-  "message": "I'm pregnant and bleeding heavily with severe pain",
-  "age": 31,
-  "expected_urgency": "emergency",
-  "expected_department": "Emergency"
- },
- {
-  "id": "e13",
-  "message": "I drank bleach by mistake",
-  "age": 4,
-  "expected_urgency": "emergency",
-  "expected_department": "Emergency"
- },
- {
-  "id": "e14",
-  "message": "This is the worst headache of my life, it came on all of a sudden",
-  "age": 40,
-  "expected_urgency": "emergency",
-  "expected_department": "Emergency"
- },
- {
-  "id": "e15",
-  "message": "I was in a car accident and my leg bone is sticking out",
-  "age": 27,
-  "expected_urgency": "emergency",
-  "expected_department": "Emergency"
- },
- {
-  "id": "u01",
-  "message": "I've had a fever of 39.5 for three days with a bad cough and I feel weak",
-  "age": 35,
-  "expected_urgency": "urgent",
-  "expected_department": "General Medicine"
- },
- {
-  "id": "u02",
-  "message": "My child has had a high fever and ear pain since last night",
-  "age": 5,
-  "expected_urgency": "urgent",
-  "expected_department": "Pediatrics"
- },
- {
-  "id": "u03",
-  "message": "I twisted my ankle yesterday, it is very swollen and I can't put weight on it",
-  "age": 26,
-  "expected_urgency": "urgent",
-  "expected_department": "Orthopedics"
- },
- {
-  "id": "u04",
-  "message": "I have had severe abdominal pain for a day with vomiting, no blood",
-  "age": 33,
-  "expected_urgency": "urgent",
-  "expected_department": "General Medicine"
- },
- {
-  "id": "u05",
-  "message": "My blood pressure readings at home have been very high for two days and I have a pounding headache",
-  "age": 62,
-  "expected_urgency": "urgent",
-  "expected_department": "Cardiology"
- },
- {
-  "id": "u06",
-  "message": "I've had numbness and tingling in my left hand for two days that keeps getting worse",
-  "age": 55,
-  "expected_urgency": "urgent",
-  "expected_department": "Neurology"
- },
- {
-  "id": "u07",
-  "message": "A rash is spreading quickly over my body and it itches badly, started yesterday",
-  "age": 30,
-  "expected_urgency": "urgent",
-  "expected_department": "Dermatology"
- },
- {
-  "id": "u08",
-  "message": "My toddler has been vomiting and has diarrhoea for a day and is drinking very little",
-  "age": 2,
-  "expected_urgency": "urgent",
-  "expected_department": "Pediatrics"
- },
- {
-  "id": "r01",
-  "message": "I get recurring headaches a few times a month, mild to moderate",
-  "age": 38,
-  "expected_urgency": "routine",
-  "expected_department": "Neurology"
- },
- {
-  "id": "r02",
-  "message": "I want a check-up for my mild chest palpitations that come and go while resting, no pain",
-  "age": 44,
-  "expected_urgency": "routine",
-  "expected_department": "Cardiology"
- },
- {
-  "id": "r03",
-  "message": "I've had knee pain when climbing stairs for a few months",
-  "age": 60,
-  "expected_urgency": "routine",
-  "expected_department": "Orthopedics"
- },
- {
-  "id": "r04",
-  "message": "I have an itchy patch of dry skin on my elbow that has been there for weeks",
-  "age": 25,
-  "expected_urgency": "routine",
-  "expected_department": "Dermatology"
- },
- {
-  "id": "r05",
-  "message": "My child needs a routine vaccination and growth check",
-  "age": 3,
-  "expected_urgency": "routine",
-  "expected_department": "Pediatrics"
- },
- {
-  "id": "r06",
-  "message": "I feel tired all the time for the last month and want to get checked",
-  "age": 42,
-  "expected_urgency": "routine",
-  "expected_department": "General Medicine"
- },
- {
-  "id": "r07",
-  "message": "I have lower back pain on and off for several weeks after lifting",
-  "age": 36,
-  "expected_urgency": "routine",
-  "expected_department": "Orthopedics"
- },
- {
-  "id": "r08",
-  "message": "I have acne that isn't improving with over-the-counter products",
-  "age": 19,
-  "expected_urgency": "routine",
-  "expected_department": "Dermatology"
- },
- {
-  "id": "s01",
-  "message": "I have a mild runny nose and sneezing for two days, no fever",
-  "age": 28,
-  "expected_urgency": "self-care",
-  "expected_department": "General Medicine"
- },
- {
-  "id": "s02",
-  "message": "A mild sore throat since this morning, otherwise feeling fine",
-  "age": 31,
-  "expected_urgency": "self-care",
-  "expected_department": "General Medicine"
- },
- {
-  "id": "s03",
-  "message": "I have a small blister on my heel from new shoes",
-  "age": 24,
-  "expected_urgency": "self-care",
-  "expected_department": "General Medicine"
- },
- {
-  "id": "s04",
-  "message": "Slight muscle soreness after yesterday's workout",
-  "age": 33,
-  "expected_urgency": "self-care",
-  "expected_department": "General Medicine"
- },
- {
-  "id": "s05",
-  "message": "I've got a minor paper cut that has stopped bleeding",
-  "age": 41,
-  "expected_urgency": "self-care",
-  "expected_department": "General Medicine"
- },
- {
-  "id": "s06",
-  "message": "Mild heartburn after a spicy meal last night, feeling better now",
-  "age": 37,
-  "expected_urgency": "self-care",
-  "expected_department": "General Medicine"
- }
+  {
+    "id": "e01",
+    "message": "I have crushing chest pain that goes down my left arm and I'm sweating",
+    "age": 58,
+    "expected_urgency": "emergency",
+    "expected_department": "Emergency"
+  },
+  {
+    "id": "e02",
+    "message": "My father's face is drooping on one side and his speech is slurred",
+    "age": 70,
+    "expected_urgency": "emergency",
+    "expected_department": "Emergency"
+  },
+  {
+    "id": "e03",
+    "message": "I cut my leg badly and the bleeding won't stop even with pressure",
+    "age": 34,
+    "expected_urgency": "emergency",
+    "expected_department": "Emergency"
+  },
+  {
+    "id": "e04",
+    "message": "I can't breathe properly, I'm gasping and my lips are turning blue",
+    "age": 45,
+    "expected_urgency": "emergency",
+    "expected_department": "Emergency"
+  },
+  {
+    "id": "e05",
+    "message": "My son had a seizure and is not responding to us",
+    "age": 8,
+    "expected_urgency": "emergency",
+    "expected_department": "Emergency"
+  },
+  {
+    "id": "e06",
+    "message": "I want to kill myself, I have pills in my hand",
+    "age": 29,
+    "expected_urgency": "emergency",
+    "expected_department": "Emergency"
+  },
+  {
+    "id": "e07",
+    "message": "My throat is closing up after eating peanuts and my tongue is swelling",
+    "age": 22,
+    "expected_urgency": "emergency",
+    "expected_department": "Emergency"
+  },
+  {
+    "id": "e08",
+    "message": "I passed out at work and woke up on the floor, now I have chest tightness",
+    "age": 51,
+    "expected_urgency": "emergency",
+    "expected_department": "Emergency"
+  },
+  {
+    "id": "e09",
+    "message": "I'm vomiting blood and feel very dizzy",
+    "age": 47,
+    "expected_urgency": "emergency",
+    "expected_department": "Emergency"
+  },
+  {
+    "id": "e10",
+    "message": "My 3-week-old baby has a fever and is hard to wake up",
+    "age": 0,
+    "expected_urgency": "emergency",
+    "expected_department": "Emergency"
+  },
+  {
+    "id": "e11",
+    "message": "I suddenly lost vision in one eye and can't move my arm",
+    "age": 66,
+    "expected_urgency": "emergency",
+    "expected_department": "Emergency"
+  },
+  {
+    "id": "e12",
+    "message": "I'm pregnant and bleeding heavily with severe pain",
+    "age": 31,
+    "expected_urgency": "emergency",
+    "expected_department": "Emergency"
+  },
+  {
+    "id": "e13",
+    "message": "I drank bleach by mistake",
+    "age": 4,
+    "expected_urgency": "emergency",
+    "expected_department": "Emergency"
+  },
+  {
+    "id": "e14",
+    "message": "This is the worst headache of my life, it came on all of a sudden",
+    "age": 40,
+    "expected_urgency": "emergency",
+    "expected_department": "Emergency"
+  },
+  {
+    "id": "e15",
+    "message": "I was in a car accident and my leg bone is sticking out",
+    "age": 27,
+    "expected_urgency": "emergency",
+    "expected_department": "Emergency"
+  },
+  {
+    "id": "u01",
+    "message": "I've had a fever of 39.5 for three days with a bad cough and I feel weak",
+    "age": 35,
+    "expected_urgency": "urgent",
+    "expected_department": "General Medicine"
+  },
+  {
+    "id": "u02",
+    "message": "My child has had a high fever and ear pain since last night",
+    "age": 5,
+    "expected_urgency": "urgent",
+    "expected_department": "Pediatrics"
+  },
+  {
+    "id": "u03",
+    "message": "I twisted my ankle yesterday, it is very swollen and I can't put weight on it",
+    "age": 26,
+    "expected_urgency": "urgent",
+    "expected_department": "Orthopedics"
+  },
+  {
+    "id": "u04",
+    "message": "I have had severe abdominal pain for a day with vomiting, no blood",
+    "age": 33,
+    "expected_urgency": "urgent",
+    "expected_department": "General Medicine"
+  },
+  {
+    "id": "u05",
+    "message": "My blood pressure readings at home have been very high for two days and I have a pounding headache",
+    "age": 62,
+    "expected_urgency": "urgent",
+    "expected_department": "Cardiology"
+  },
+  {
+    "id": "u06",
+    "message": "I've had numbness and tingling in my left hand for two days that keeps getting worse",
+    "age": 55,
+    "expected_urgency": "urgent",
+    "expected_department": "Neurology"
+  },
+  {
+    "id": "u07",
+    "message": "A rash is spreading quickly over my body and it itches badly, started yesterday",
+    "age": 30,
+    "expected_urgency": "urgent",
+    "expected_department": "Dermatology"
+  },
+  {
+    "id": "u08",
+    "message": "My toddler has been vomiting and has diarrhoea for a day and is drinking very little",
+    "age": 2,
+    "expected_urgency": "urgent",
+    "expected_department": "Pediatrics"
+  },
+  {
+    "id": "r01",
+    "message": "I get recurring headaches a few times a month, mild to moderate",
+    "age": 38,
+    "expected_urgency": "routine",
+    "expected_department": "Neurology"
+  },
+  {
+    "id": "r02",
+    "message": "I want a check-up for my mild chest palpitations that come and go while resting, no pain",
+    "age": 44,
+    "expected_urgency": "routine",
+    "expected_department": "Cardiology"
+  },
+  {
+    "id": "r03",
+    "message": "I've had knee pain when climbing stairs for a few months",
+    "age": 60,
+    "expected_urgency": "routine",
+    "expected_department": "Orthopedics"
+  },
+  {
+    "id": "r04",
+    "message": "I have an itchy patch of dry skin on my elbow that has been there for weeks",
+    "age": 25,
+    "expected_urgency": "routine",
+    "expected_department": "Dermatology"
+  },
+  {
+    "id": "r05",
+    "message": "My child needs a routine vaccination and growth check",
+    "age": 3,
+    "expected_urgency": "routine",
+    "expected_department": "Pediatrics"
+  },
+  {
+    "id": "r06",
+    "message": "I feel tired all the time for the last month and want to get checked",
+    "age": 42,
+    "expected_urgency": "routine",
+    "expected_department": "General Medicine"
+  },
+  {
+    "id": "r07",
+    "message": "I have lower back pain on and off for several weeks after lifting",
+    "age": 36,
+    "expected_urgency": "routine",
+    "expected_department": "Orthopedics"
+  },
+  {
+    "id": "r08",
+    "message": "I have acne that isn't improving with over-the-counter products",
+    "age": 19,
+    "expected_urgency": "routine",
+    "expected_department": "Dermatology"
+  },
+  {
+    "id": "s01",
+    "message": "I have a mild runny nose and sneezing for two days, no fever",
+    "age": 28,
+    "expected_urgency": "self-care",
+    "expected_department": "General Medicine"
+  },
+  {
+    "id": "s02",
+    "message": "A mild sore throat since this morning, otherwise feeling fine",
+    "age": 31,
+    "expected_urgency": "self-care",
+    "expected_department": "General Medicine"
+  },
+  {
+    "id": "s03",
+    "message": "I have a small blister on my heel from new shoes",
+    "age": 24,
+    "expected_urgency": "self-care",
+    "expected_department": "General Medicine"
+  },
+  {
+    "id": "s04",
+    "message": "Slight muscle soreness after yesterday's workout",
+    "age": 33,
+    "expected_urgency": "self-care",
+    "expected_department": "General Medicine"
+  },
+  {
+    "id": "s05",
+    "message": "I've got a minor paper cut that has stopped bleeding",
+    "age": 41,
+    "expected_urgency": "self-care",
+    "expected_department": "General Medicine"
+  },
+  {
+    "id": "s06",
+    "message": "Mild heartburn after a spicy meal last night, feeling better now",
+    "age": 37,
+    "expected_urgency": "self-care",
+    "expected_department": "General Medicine"
+  },
+  {
+    "id": "e16",
+    "message": "My 75-year-old mother has a 40C fever, is shivering violently, confused, and her skin looks mottled",
+    "age": 75,
+    "expected_urgency": "emergency",
+    "expected_department": "Emergency"
+  },
+  {
+    "id": "e17",
+    "message": "My 4-year-old is drooling and struggling to swallow with a loud high-pitched sound when breathing",
+    "age": 4,
+    "expected_urgency": "emergency",
+    "expected_department": "Emergency"
+  },
+  {
+    "id": "e18",
+    "message": "I was stung by a wasp and my lips are swelling rapidly and I cannot catch my breath",
+    "age": 28,
+    "expected_urgency": "emergency",
+    "expected_department": "Emergency"
+  },
+  {
+    "id": "e19",
+    "message": "I felt a sudden severe tearing pain between my shoulder blades that radiates to my chest",
+    "age": 64,
+    "expected_urgency": "emergency",
+    "expected_department": "Emergency"
+  },
+  {
+    "id": "e20",
+    "message": "Our 10-day-old newborn has a fever of 38.5, is completely limp, and won't feed",
+    "age": 0,
+    "expected_urgency": "emergency",
+    "expected_department": "Emergency"
+  },
+  {
+    "id": "e21",
+    "message": "Suspected carbon monoxide leak in our apartment, everyone feels nauseous, dizzy, and my roommate passed out",
+    "age": 30,
+    "expected_urgency": "emergency",
+    "expected_department": "Emergency"
+  },
+  {
+    "id": "e22",
+    "message": "I suddenly lost my vision in my right eye completely about 15 minutes ago, no pain",
+    "age": 59,
+    "expected_urgency": "emergency",
+    "expected_department": "Emergency"
+  },
+  {
+    "id": "e23",
+    "message": "I fell off a ladder, lost consciousness for a couple minutes, and now I am vomiting repeatedly with a severe head injury",
+    "age": 49,
+    "expected_urgency": "emergency",
+    "expected_department": "Emergency"
+  },
+  {
+    "id": "u09",
+    "message": "My right calf is red, swollen, warm, and tender to walk on for the last two days after a 12-hour flight",
+    "age": 52,
+    "expected_urgency": "urgent",
+    "expected_department": "General Medicine"
+  },
+  {
+    "id": "u10",
+    "message": "I have burning urination, a 39C fever, and severe pain in my right flank that started yesterday",
+    "age": 31,
+    "expected_urgency": "urgent",
+    "expected_department": "General Medicine"
+  },
+  {
+    "id": "u11",
+    "message": "I slipped on ice and fell on my wrist, it is visibly deformed and swollen, skin is intact and fingers are pink",
+    "age": 43,
+    "expected_urgency": "urgent",
+    "expected_department": "Orthopedics"
+  },
+  {
+    "id": "u12",
+    "message": "I have a painful burning rash with small fluid-filled blisters across one side of my ribs that appeared yesterday",
+    "age": 61,
+    "expected_urgency": "urgent",
+    "expected_department": "Dermatology"
+  },
+  {
+    "id": "u13",
+    "message": "A metal flake flew into my eye while grinding, it feels gritty, waters constantly and hurts when blinking",
+    "age": 39,
+    "expected_urgency": "urgent",
+    "expected_department": "General Medicine"
+  },
+  {
+    "id": "u14",
+    "message": "I am breastfeeding and have a hard, red, painful wedge on my left breast with chills and 38.8C fever",
+    "age": 29,
+    "expected_urgency": "urgent",
+    "expected_department": "General Medicine"
+  },
+  {
+    "id": "u15",
+    "message": "My 3-year-old child developed a harsh barking seal-like cough overnight with hoarseness, breathing comfortably while resting",
+    "age": 3,
+    "expected_urgency": "urgent",
+    "expected_department": "Pediatrics"
+  },
+  {
+    "id": "r09",
+    "message": "I need my semi-annual hypertension checkup and prescription renewal for amlodipine, no complaints",
+    "age": 57,
+    "expected_urgency": "routine",
+    "expected_department": "Cardiology"
+  },
+  {
+    "id": "r10",
+    "message": "I experience joint stiffness in my fingers for 15 minutes each morning, persisting for several months",
+    "age": 63,
+    "expected_urgency": "routine",
+    "expected_department": "Orthopedics"
+  },
+  {
+    "id": "r11",
+    "message": "I have been experiencing typical migraine attacks twice a month for over a year and would like to discuss preventive options",
+    "age": 34,
+    "expected_urgency": "routine",
+    "expected_department": "Neurology"
+  },
+  {
+    "id": "r12",
+    "message": "I have thick scaly plaques on my elbows and knees that have persisted for a year despite over-the-counter creams",
+    "age": 42,
+    "expected_urgency": "routine",
+    "expected_department": "Dermatology"
+  },
+  {
+    "id": "r13",
+    "message": "I have been feeling fatigued and lacking energy for the past eight weeks, would like general blood tests",
+    "age": 36,
+    "expected_urgency": "routine",
+    "expected_department": "General Medicine"
+  },
+  {
+    "id": "s07",
+    "message": "Mild sunburn across my shoulders after being outdoors yesterday, skin is pink and slightly warm, no blisters",
+    "age": 27,
+    "expected_urgency": "self-care",
+    "expected_department": "General Medicine"
+  },
+  {
+    "id": "s08",
+    "message": "I bumped my shin against a wooden coffee table, there is a small quarter-sized bruise, no swelling or limping",
+    "age": 32,
+    "expected_urgency": "self-care",
+    "expected_department": "General Medicine"
+  },
+  {
+    "id": "s09",
+    "message": "Mild dull tension ache across forehead after working late staring at monitors, goes away with a break",
+    "age": 29,
+    "expected_urgency": "self-care",
+    "expected_department": "General Medicine"
+  }
 ]

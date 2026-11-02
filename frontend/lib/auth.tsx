@@ -12,12 +12,16 @@ import {
   type Role,
 } from "./api";
 
-export type User = { id: string; email: string; full_name: string; role: Role };
+export type User = { id: string; email: string; full_name: string; role: Role; mfa_enabled: boolean };
+export type LoginResult = { user?: User; mfa_required?: boolean; mfa_ticket?: string | null };
+
 type AuthState = {
   user: User | null;
   loading: boolean;
-  login: (email: string, password: string) => Promise<User>;
+  login: (email: string, password: string) => Promise<LoginResult>;
+  verifyMfaLogin: (mfa_ticket: string, code: string) => Promise<User>;
   register: (body: RegisterBody) => Promise<User>;
+  reloadMe: () => Promise<User>;
   logout: () => Promise<void>;
 };
 export type RegisterBody = {
@@ -37,7 +41,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const loadMe = useCallback(async (): Promise<User> => {
     const me = unwrap(await api.GET("/api/auth/me"));
-    const u = { id: me.id, email: me.email, full_name: me.full_name, role: me.role as Role };
+    const u: User = {
+      id: me.id,
+      email: me.email,
+      full_name: me.full_name,
+      role: me.role as Role,
+      mfa_enabled: Boolean(me.mfa_enabled),
+    };
     setUser(u);
     return u;
   }, []);
@@ -64,13 +74,26 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       user,
       loading,
       login: async (email, password) => {
-        setTokens(unwrap(await api.POST("/api/auth/login", { body: { email, password } })));
+        const pair = unwrap(await api.POST("/api/auth/login", { body: { email, password } }));
+        if (pair.mfa_required) {
+          return { mfa_required: true, mfa_ticket: pair.mfa_ticket };
+        }
+        setTokens(pair);
+        const u = await loadMe();
+        return { user: u, mfa_required: false };
+      },
+      verifyMfaLogin: async (mfa_ticket, code) => {
+        const pair = unwrap(
+          await api.POST("/api/auth/mfa/verify-login", { body: { mfa_ticket, code } }),
+        );
+        setTokens(pair);
         return loadMe();
       },
       register: async (body) => {
         setTokens(unwrap(await api.POST("/api/auth/register", { body })));
         return loadMe();
       },
+      reloadMe: loadMe,
       logout: async () => {
         const refresh = getRefreshToken();
         if (refresh) await api.POST("/api/auth/logout", { body: { refresh_token: refresh } });

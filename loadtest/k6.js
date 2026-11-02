@@ -1,5 +1,7 @@
 // k6 run -e BASE_URL=http://backend:8000 loadtest/k6.js
 // 50 concurrent virtual users on non-AI endpoints; target: p95 < 300 ms, errors < 1 %.
+// To include AI endpoint load testing (triage, red-flag pre-check, FAQ):
+// k6 run -e BASE_URL=http://localhost:8000 -e AI_VUS=5 loadtest/k6.js
 import http from "k6/http";
 import { check, sleep } from "k6";
 
@@ -8,11 +10,16 @@ const PASSWORD = "DemoPass!12345";
 const JSON_HDR = { "Content-Type": "application/json" };
 
 const LOGIN_RATE = Number(__ENV.LOGIN_RATE || 2);
+const AI_VUS = Number(__ENV.AI_VUS || 0);
+
 const scenarios = {
   browse: { executor: "constant-vus", vus: Number(__ENV.VUS || 50), duration: __ENV.DURATION || "60s", exec: "browse" },
 };
 if (LOGIN_RATE > 0) {
   scenarios.logins = { executor: "constant-arrival-rate", rate: LOGIN_RATE, timeUnit: "1s", duration: __ENV.DURATION || "60s", preAllocatedVUs: 5, exec: "loginOnly" };
+}
+if (AI_VUS > 0) {
+  scenarios.ai = { executor: "constant-vus", vus: AI_VUS, duration: __ENV.DURATION || "60s", exec: "aiWorkflow" };
 }
 
 export const options = {
@@ -31,6 +38,10 @@ export const options = {
     "http_req_duration{name:calendar}": ["p(95)<10000"],
     "http_req_duration{name:doctor_schedule}": ["p(95)<10000"],
     "http_req_duration{name:doctor_patients}": ["p(95)<10000"],
+    "http_req_duration{name:ai_status}": ["p(95)<200"],
+    "http_req_duration{name:ai_redflag_shortcircuit}": ["p(95)<200"],
+    "http_req_duration{name:ai_faq}": ["p(95)<3000"],
+    "http_req_duration{name:ai_triage}": ["p(95)<4000"],
   },
 };
 
@@ -53,6 +64,7 @@ export function setup() {
 }
 
 const H = (t) => ({ headers: { Authorization: `Bearer ${t}` } });
+const H_JSON = (t) => ({ headers: { Authorization: `Bearer ${t}`, ...JSON_HDR } });
 const day = (n) => new Date(Date.now() + n * 86400000).toISOString().slice(0, 10);
 
 export function browse(data) {
@@ -79,4 +91,53 @@ export function browse(data) {
 
 export function loginOnly() {
   login("patient1@example.com", PASSWORD);
+}
+
+export function aiWorkflow(data) {
+  const patientToken = data.tokens.p1;
+  
+  // 1. Check AI availability status
+  check(
+    http.get(`${BASE}/api/ai/status`, { ...H(patientToken), tags: { name: "ai_status" } }),
+    { "ai status 200": (r) => r.status === 200 }
+  );
+
+  // 2. Deterministic emergency red-flag pre-check (must return in < 50ms without hitting LLM)
+  const redFlagPayload = JSON.stringify({
+    message: "I have crushing chest pain that radiates down my left arm and I am sweating",
+    conversation_id: null,
+  });
+  const rfRes = http.post(`${BASE}/api/ai/triage/message`, redFlagPayload, {
+    ...H_JSON(patientToken),
+    tags: { name: "ai_redflag_shortcircuit" },
+  });
+  check(rfRes, {
+    "redflag 200": (r) => r.status === 200,
+    "redflag emergency": (r) => r.json("urgency") === "emergency",
+  });
+
+  // 3. Hospital FAQ knowledge base query
+  const faqPayload = JSON.stringify({ question: "What are your visiting hours?" });
+  check(
+    http.post(`${BASE}/api/ai/faq`, faqPayload, {
+      ...H_JSON(patientToken),
+      tags: { name: "ai_faq" },
+    }),
+    { "faq 200": (r) => r.status === 200 }
+  );
+
+  // 4. Routine symptom triage inquiry
+  const triagePayload = JSON.stringify({
+    message: "I have had a mild runny nose and sneezing for two days without fever",
+    conversation_id: null,
+  });
+  check(
+    http.post(`${BASE}/api/ai/triage/message`, triagePayload, {
+      ...H_JSON(patientToken),
+      tags: { name: "ai_triage" },
+    }),
+    { "triage 200": (r) => r.status === 200 }
+  );
+
+  sleep(2 + Math.random() * 3); // realistic patient pacing (2-5 s)
 }

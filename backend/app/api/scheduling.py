@@ -186,8 +186,12 @@ async def set_slot_config(
     doctor_id: uuid.UUID,
     body: SlotConfigIn,
     db: AsyncSession = Depends(get_db),
-    user: User = Depends(require_roles("admin")),
+    user: User = Depends(require_roles("admin", "doctor")),
 ) -> DoctorOut:
+    if user.role.name == "doctor":
+        me = await get_doctor_for_user(db, user)
+        if me is None or me.id != doctor_id:
+            raise HTTPException(status.HTTP_403_FORBIDDEN, "May only configure your own slots")
     doctor = await _get_doctor(db, doctor_id)
     doctor.slot_minutes = body.slot_minutes
     await db.commit()

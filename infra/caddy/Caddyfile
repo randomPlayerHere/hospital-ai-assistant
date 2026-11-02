@@ -11,7 +11,15 @@
 	header {
 		Strict-Transport-Security "max-age=63072000; includeSubDomains; preload"
 		X-Content-Type-Options "nosniff"
+		X-Frame-Options "DENY"
+		Referrer-Policy "no-referrer"
 		-Server
+	}
+
+	# Block malicious scanners and sensitive probes at the edge
+	@blocked path_regexp (\.env|\.git|\.aws|wp-login|\.sql|\.bak)
+	handle @blocked {
+		respond "Access Denied" 403
 	}
 
 	# API and health endpoints go to FastAPI; everything else is the Next.js app.

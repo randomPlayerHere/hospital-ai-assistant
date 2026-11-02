@@ -47,6 +47,7 @@ class S3Storage:
             endpoint_url=s.s3_endpoint_url or None,
             aws_access_key_id=s.s3_access_key or None,
             aws_secret_access_key=s.s3_secret_key or None,
+            region_name=s.s3_region or "us-east-1",
         )
 
     async def put(self, key: str, data: bytes, content_type: str) -> None:
@@ -60,8 +61,15 @@ class S3Storage:
         )
 
     async def get(self, key: str) -> bytes:
-        obj = await asyncio.to_thread(self.client.get_object, Bucket=self.bucket, Key=key)
-        return await asyncio.to_thread(obj["Body"].read)
+        from botocore.exceptions import ClientError
+
+        try:
+            obj = await asyncio.to_thread(self.client.get_object, Bucket=self.bucket, Key=key)
+            return await asyncio.to_thread(obj["Body"].read)
+        except ClientError as e:
+            if e.response.get("Error", {}).get("Code") in ("NoSuchKey", "404"):
+                raise FileNotFoundError(f"Key not found in S3: {key}") from e
+            raise
 
     async def delete(self, key: str) -> None:
         await asyncio.to_thread(self.client.delete_object, Bucket=self.bucket, Key=key)

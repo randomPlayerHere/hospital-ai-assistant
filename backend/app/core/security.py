@@ -14,7 +14,7 @@ def hash_password(password: str) -> str:
 def verify_password(password: str, hashed: str) -> bool:
     try:
         return _hasher.verify(hashed, password)
-    except VerificationError, InvalidHashError:
+    except (VerificationError, InvalidHashError):
         return False
 
 

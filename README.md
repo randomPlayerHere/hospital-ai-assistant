@@ -58,21 +58,24 @@ make load-test                        # k6, 50 users; see docs/LOADTEST.md
 make api-docs                         # regenerate docs/API.md and the typed frontend client
 python -m app.ai.evals.run [--live]   # triage eval (rules always; LLM needs a key) -> backend/app/ai/evals/REPORT.md
 ```
-Results from local runs on 2026-09-30: 132 backend tests at 95 % coverage (CI gate 80 %), 18 frontend unit tests, 13 Playwright tests (full role flow + axe WCAG 2.1 AA scans of every main page), 0 npm/pip audit findings, Trivy clean (no fixable HIGH/CRITICAL). **New npm advisories have appeared since then; see `to_Do.md` for current CI status.**
+Test status: 132 backend unit/integration tests at 95 % coverage (CI gate 80 %), 18 frontend unit tests, 13 Playwright E2E tests (full role flows + axe WCAG 2.1 AA scans on every page, weekend-proof), 0 npm/pip audit vulnerabilities, Trivy clean. All security hardening items (MFA, ClamAV streaming scanner, CSP nonces, httpOnly cookies, audit log hash chaining, field encryption key rotation, data retention purge) are complete.
 
 ## Documentation
 | Doc | Contents |
 |---|---|
-| `to_Do.md` | **Start here if you're joining the project:** what's done, what's still needed, setup |
-| `docs/USER_GUIDE.md` | What each role can do, step by step |
-| `docs/DEMO.md` | 10-minute demo script |
-| `docs/ARCHITECTURE.md` | System diagram, ER diagram, design points |
-| `docs/API.md` | Endpoint reference (generated) |
-| `docs/SECURITY.md` | Threat model, PHI handling, test results |
-| `docs/RUNBOOK.md` | First-time server setup, deploy, rollback, backup/restore, incidents |
-| `docs/LOADTEST.md` | Load-test method, results and what it uncovered |
-| `docs/DECISIONS.md` | Assumptions and deviations from the brief |
-| `backend/app/ai/evals/REPORT.md` | Triage evaluation report |
+| `to_Do.md` | **Project Status & Tracking:** what's done, roadmap, deployment readiness |
+| `docs/USER_GUIDE.md` | Role-by-role workflows (Patient, Doctor, Reception, Admin, MFA, Password Management) |
+| `docs/DEMO.md` | 10-minute interactive demo script |
+| `docs/ARCHITECTURE.md` | System architecture, ER diagram, security services, data flows |
+| `docs/API.md` | Complete REST API endpoint reference |
+| `docs/SECURITY.md` | STRIDE threat model, PHI handling, MFA, encryption, WAF, accessibility audit |
+| `docs/COMPLIANCE.md` | HIPAA / GDPR compliance mapping, Anthropic BAA & zero-retention requirements |
+| `docs/RUNBOOK.md` | Server provisioning, deployment, rollback, backup/restore, incident responses |
+| `docs/LOADTEST.md` | k6 load-testing results (50 VUs, AI triage and FAQ benchmark latency) |
+| `docs/DECISIONS.md` | Architectural decisions, constraints, trade-offs |
+| `docs/PGVECTOR_EVALUATION.md` | pgvector vs lexical TF-IDF evaluation and migration blueprint |
+| `backend/app/ai/evals/CLINICAL_REVIEW.md` | Clinician review, MTS/ESI framework, and 60 benchmark cases |
+| `backend/app/ai/evals/REPORT.md` | Triage rule-based evaluation report (100% emergency recall) |
 
 ## Repository layout
 `backend/` API, models, migrations, AI layer, tests · `frontend/` Next.js app, unit and E2E tests · `infra/` compose files, Caddyfile, scripts (deploy, smoke, backup, restore, provision) · `knowledge_base/` FAQ documents for the bot · `loadtest/` k6 · `.github/workflows/` CI and deploy.

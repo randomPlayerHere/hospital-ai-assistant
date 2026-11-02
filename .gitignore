@@ -22,3 +22,7 @@ frontend/openapi.json.bak
 infra/.deployed_tag
 frontend/playwright-report/
 frontend/test-results/
+frontend/tsconfig.tsbuildinfo
+*.tsbuildinfo
+backend/hospital_ai_backend.egg-info/
+*.egg-info/

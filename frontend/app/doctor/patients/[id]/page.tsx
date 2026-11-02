@@ -105,6 +105,90 @@ function Briefing({ patientId }: { patientId: string }) {
   );
 }
 
+
+function VisitVersions({ visitId }: { visitId: string }) {
+  const [open, setOpen] = useState(false);
+  const versions = useAsync(
+    async () =>
+      open
+        ? unwrap(
+            await api.GET("/api/visits/{visit_id}/versions", {
+              params: { path: { visit_id: visitId } },
+            }),
+          )
+        : [],
+    [open, visitId],
+  );
+
+  if (!open) {
+    return (
+      <button
+        type="button"
+        onClick={() => setOpen(true)}
+        className="mt-1 text-xs font-medium text-blue-700 underline hover:text-blue-900"
+      >
+        View version history
+      </button>
+    );
+  }
+
+  return (
+    <div className="mt-2 rounded border border-slate-300 bg-slate-50 p-3 text-xs space-y-2">
+      <div className="flex items-center justify-between">
+        <span className="font-semibold text-slate-700">Audit Version History</span>
+        <button
+          type="button"
+          onClick={() => setOpen(false)}
+          className="text-slate-500 hover:text-slate-800 underline"
+        >
+          Hide history
+        </button>
+      </div>
+      {versions.loading ? (
+        <Spinner />
+      ) : versions.error ? (
+        <Alert kind="error">{errorMessage(versions.error)}</Alert>
+      ) : (versions.data ?? []).length === 0 ? (
+        <p className="text-slate-500">No previous versions recorded.</p>
+      ) : (
+        <ul className="divide-y divide-slate-200">
+          {versions.data?.map((ver) => {
+            const d = (ver.data ?? {}) as Record<string, unknown>;
+            return (
+              <li key={ver.version} className="py-2 space-y-1">
+                <div className="flex justify-between font-medium">
+                  <span>Version {ver.version}</span>
+                  <span className="text-slate-500">{fmtDateTime(ver.changed_at)}</span>
+                </div>
+                {d.chief_complaint != null && (
+                  <p>
+                    <span className="text-slate-500">Chief complaint:</span> {String(d.chief_complaint)}
+                  </p>
+                )}
+                {d.diagnosis != null && (
+                  <p>
+                    <span className="text-slate-500">Diagnosis:</span> {String(d.diagnosis)}
+                  </p>
+                )}
+                {d.notes != null && (
+                  <p className="whitespace-pre-wrap">
+                    <span className="text-slate-500">Notes:</span> {String(d.notes)}
+                  </p>
+                )}
+                {d.vitals != null && typeof d.vitals === "object" && Object.keys(d.vitals as object).length > 0 && (
+                  <p>
+                    <span className="text-slate-500">Vitals:</span> {JSON.stringify(d.vitals)}
+                  </p>
+                )}
+              </li>
+            );
+          })}
+        </ul>
+      )}
+    </div>
+  );
+}
+
 function VisitForm({ patientId, done }: { patientId: string; done: () => void }) {
   const [f, setF] = useState({
     chief_complaint: "",
@@ -248,6 +332,7 @@ export default function DoctorChart() {
                     Prescriptions: {v.prescriptions.map((r) => `${r.drug_name} ${r.dosage ?? ""}`).join(", ")}
                   </p>
                 )}
+                <VisitVersions visitId={v.id} />
               </li>
             ))}
           </ul>

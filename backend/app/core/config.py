@@ -26,6 +26,7 @@ class Settings(BaseSettings):
     s3_endpoint_url: str = ""
     s3_access_key: str = ""
     s3_secret_key: str = ""
+    s3_region: str = "us-east-1"
 
     email_backend: str = "console"
     smtp_host: str = ""
@@ -35,6 +36,10 @@ class Settings(BaseSettings):
 
     sentry_dsn: str = ""
     redis_url: str = ""  # shared rate-limit counters across workers; empty = per-process memory
+    clamav_host: str = ""
+    clamav_port: int = 3310
+    clamav_timeout: float = 10.0
+    audit_log_stream_path: str = ""  # optional: append-only JSONL stream for tamper-evident external storage
 
     @property
     def cors_origin_list(self) -> list[str]:

@@ -14,8 +14,10 @@ def send_email(to: str, subject: str, body: str) -> None:
         msg = EmailMessage()
         msg["To"], msg["From"], msg["Subject"] = to, s.smtp_user or "noreply@hospital", subject
         msg.set_content(body)
-        with smtplib.SMTP(s.smtp_host, s.smtp_port) as smtp:
-            smtp.starttls()
+        smtp_cls = smtplib.SMTP_SSL if s.smtp_port == 465 else smtplib.SMTP
+        with smtp_cls(s.smtp_host, s.smtp_port) as smtp:
+            if s.smtp_port != 465 and smtp.has_extn("starttls"):
+                smtp.starttls()
             if s.smtp_user:
                 smtp.login(s.smtp_user, s.smtp_password)
             smtp.send_message(msg)

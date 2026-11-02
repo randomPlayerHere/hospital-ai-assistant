@@ -97,6 +97,13 @@ async def test_booking_removes_slot_and_slot_config_change(client):
     assert datetime.fromisoformat(s[1]["starts_at"]) - datetime.fromisoformat(
         s[0]["starts_at"]
     ) in (timedelta(minutes=15), timedelta(days=1) - timedelta(hours=7, minutes=45))
+    # Doctor can configure their own slot length
+    hd = await login_headers(client, "doctor1@hospital.example.com")
+    d_me = (await client.get("/api/doctors/me", headers=hd)).json()
+    assert (
+        await client.put(f"/api/doctors/{d_me['id']}/slot-config", json={"slot_minutes": 20}, headers=hd)
+    ).status_code == 200
+    await client.put(f"/api/doctors/{d_me['id']}/slot-config", json={"slot_minutes": 30}, headers=hd)
     await client.put(f"/api/doctors/{did}/slot-config", json={"slot_minutes": 30}, headers=ha)
 
 

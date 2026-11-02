@@ -965,6 +965,91 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/auth/change-password": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Change Password */
+        post: operations["change_password_api_auth_change_password_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/auth/mfa/verify-login": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Verify MFA Login */
+        post: operations["verify_mfa_login_api_auth_mfa_verify_login_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/auth/mfa/setup": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Setup MFA */
+        post: operations["setup_mfa_api_auth_mfa_setup_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/auth/mfa/enable": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Enable MFA */
+        post: operations["enable_mfa_api_auth_mfa_enable_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/auth/mfa/disable": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Disable MFA */
+        post: operations["disable_mfa_api_auth_mfa_disable_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -1547,14 +1632,21 @@ export interface components {
         /** TokenPair */
         TokenPair: {
             /** Access Token */
-            access_token: string;
+            access_token?: string | null;
             /** Refresh Token */
-            refresh_token: string;
+            refresh_token?: string | null;
             /**
              * Token Type
              * @default bearer
              */
             token_type: string;
+            /**
+             * MFA Required
+             * @default false
+             */
+            mfa_required: boolean;
+            /** MFA Ticket */
+            mfa_ticket?: string | null;
         };
         /** TriageOut */
         TriageOut: {
@@ -1625,6 +1717,11 @@ export interface components {
             role: string;
             /** Is Active */
             is_active: boolean;
+            /**
+             * MFA Enabled
+             * @default false
+             */
+            mfa_enabled: boolean;
         };
         /** ValidationError */
         ValidationError: {
@@ -1786,6 +1883,41 @@ export interface components {
             desired_date: string;
             /** Status */
             status: string;
+        };
+        /** ChangePasswordRequest */
+        ChangePasswordRequest: {
+            /** Current Password */
+            current_password: string;
+            /** New Password */
+            new_password: string;
+        };
+        /** MFAVerifyLoginRequest */
+        MFAVerifyLoginRequest: {
+            /** MFA Ticket */
+            mfa_ticket: string;
+            /** Code */
+            code: string;
+        };
+        /** MFASetupResponse */
+        MFASetupResponse: {
+            /** Secret */
+            secret: string;
+            /** OTPAuth URL */
+            otpauth_url: string;
+        };
+        /** MFAEnableRequest */
+        MFAEnableRequest: {
+            /** Secret */
+            secret: string;
+            /** Code */
+            code: string;
+        };
+        /** MFADisableRequest */
+        MFADisableRequest: {
+            /** Password */
+            password: string;
+            /** Code */
+            code: string;
         };
     };
     responses: never;
@@ -3900,6 +4032,132 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
                 };
+            };
+        };
+    };
+    change_password_api_auth_change_password_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ChangePasswordRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    verify_mfa_login_api_auth_mfa_verify_login_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["MFAVerifyLoginRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TokenPair"];
+                };
+            };
+            /** @description Invalid MFA Code or Ticket */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    setup_mfa_api_auth_mfa_setup_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MFASetupResponse"];
+                };
+            };
+        };
+    };
+    enable_mfa_api_auth_mfa_enable_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["MFAEnableRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    disable_mfa_api_auth_mfa_disable_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["MFADisableRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
         };
     };

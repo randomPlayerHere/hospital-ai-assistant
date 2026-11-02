@@ -21,13 +21,15 @@ class LoginRequest(BaseModel):
 
 
 class RefreshRequest(BaseModel):
-    refresh_token: str
+    refresh_token: str | None = None
 
 
 class TokenPair(BaseModel):
-    access_token: str
-    refresh_token: str
+    access_token: str | None = None
+    refresh_token: str | None = None
     token_type: str = "bearer"
+    mfa_required: bool = False
+    mfa_ticket: str | None = None
 
 
 class ForgotPasswordRequest(BaseModel):
@@ -39,12 +41,38 @@ class ResetPasswordRequest(BaseModel):
     new_password: str = Password
 
 
+class ChangePasswordRequest(BaseModel):
+    current_password: str
+    new_password: str = Password
+
+
+class MFAVerifyLoginRequest(BaseModel):
+    mfa_ticket: str
+    code: str = Field(min_length=6, max_length=6)
+
+
+class MFASetupResponse(BaseModel):
+    secret: str
+    otpauth_url: str
+
+
+class MFAEnableRequest(BaseModel):
+    secret: str
+    code: str = Field(min_length=6, max_length=6)
+
+
+class MFADisableRequest(BaseModel):
+    password: str
+    code: str = Field(min_length=6, max_length=6)
+
+
 class UserOut(BaseModel):
     id: uuid.UUID
     email: str
     full_name: str
     role: str
     is_active: bool
+    mfa_enabled: bool = False
 
 
 class AdminCreateUser(BaseModel):

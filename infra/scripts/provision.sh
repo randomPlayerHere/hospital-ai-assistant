@@ -19,12 +19,27 @@ touch "/home/$DEPLOY_USER/.ssh/authorized_keys" && chmod 600 "/home/$DEPLOY_USER
 chown "$DEPLOY_USER:$DEPLOY_USER" "/home/$DEPLOY_USER/.ssh/authorized_keys"
 install -d -m 750 -o "$DEPLOY_USER" -g "$DEPLOY_USER" /opt/hospital /var/backups/hospital
 
+# GitHub deploy key for cloning and fetching private repository
+DEPLOY_KEY="/home/$DEPLOY_USER/.ssh/id_ed25519"
+if [ ! -f "$DEPLOY_KEY" ]; then
+    su - "$DEPLOY_USER" -c "ssh-keygen -t ed25519 -N '' -C 'deploy-key@hospital' -f '$DEPLOY_KEY'"
+fi
+# Add github.com to known_hosts so git fetch in CI will not prompt interactively
+su - "$DEPLOY_USER" -c "ssh-keyscan -t ed25519,rsa github.com >> /home/$DEPLOY_USER/.ssh/known_hosts 2>/dev/null || true"
+chmod 600 "/home/$DEPLOY_USER/.ssh/known_hosts" 2>/dev/null || true
+chown "$DEPLOY_USER:$DEPLOY_USER" "/home/$DEPLOY_USER/.ssh/known_hosts" 2>/dev/null || true
+
 # Firewall: only SSH, HTTP (ACME + redirect) and HTTPS
 ufw default deny incoming && ufw default allow outgoing
 ufw allow OpenSSH && ufw allow 80/tcp && ufw allow 443/tcp
 ufw --force enable
 
-# SSH hardening: keys only, no root login
+# SSH hardening: keys only, no root login (support modern drop-in configs and legacy sshd_config)
+mkdir -p /etc/ssh/sshd_config.d
+cat > /etc/ssh/sshd_config.d/99-hospital-hardening.conf <<'CONF'
+PasswordAuthentication no
+PermitRootLogin no
+CONF
 sed -i 's/^#\?PasswordAuthentication .*/PasswordAuthentication no/; s/^#\?PermitRootLogin .*/PermitRootLogin no/' /etc/ssh/sshd_config
 systemctl reload ssh || systemctl reload sshd
 
@@ -45,5 +60,19 @@ cat > /etc/logrotate.d/hospital-backup <<'LR'
 LR
 touch /var/log/hospital-backup.log && chown "$DEPLOY_USER" /var/log/hospital-backup.log
 
-echo "Provisioned. Next: add the CI public key to /home/$DEPLOY_USER/.ssh/authorized_keys, clone the repo to /opt/hospital,"
-echo "create /opt/hospital/.env.prod (chmod 600) from .env.prod.example, point DNS A/AAAA records at this host, then deploy."
+echo ""
+echo "=== Provisioning Complete ==="
+echo "1. Dedicated GitHub Deploy Key for private repository:"
+echo "--------------------------------------------------------"
+cat "${DEPLOY_KEY}.pub"
+echo "--------------------------------------------------------"
+echo "Add the key above in: GitHub -> Repository -> Settings -> Deploy Keys (Read-only)."
+echo ""
+echo "2. CI deployment authorization:"
+echo "Add your CI deployment public key to: /home/$DEPLOY_USER/.ssh/authorized_keys"
+echo ""
+echo "3. Clone repository:"
+echo "sudo -u $DEPLOY_USER git clone git@github.com:<owner>/<repo>.git /opt/hospital"
+echo ""
+echo "4. Environment configuration:"
+echo "Create /opt/hospital/.env.prod (chmod 600) from .env.prod.example, point DNS A/AAAA records at this host, then deploy."

@@ -67,7 +67,19 @@ export function RoleShell({
             );
           })}
         </nav>
-        <div className="p-3">
+        <div className="space-y-2 p-3">
+          <Link
+            href="/mfa"
+            className="block text-center text-xs text-slate-600 hover:text-blue-800 hover:underline"
+          >
+            Two-factor auth (MFA)
+          </Link>
+          <Link
+            href="/change-password"
+            className="block text-center text-xs text-slate-600 hover:text-blue-800 hover:underline"
+          >
+            Change password
+          </Link>
           <Button
             variant="secondary"
             className="w-full"

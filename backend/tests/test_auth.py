@@ -238,3 +238,94 @@ async def test_admin_manages_departments(client):
 
         await db.delete(await db.get(Department, did))
         await db.commit()
+
+async def test_change_password_success_and_revocation(client, unique_email):
+    email = unique_email()
+    reg = await client.post("/api/auth/register", json={**REG, "email": email})
+    tokens = reg.json()
+    h = {"Authorization": f"Bearer {tokens['access_token']}"}
+
+    # Unauthenticated rejected
+    assert (
+        await client.post(
+            "/api/auth/change-password",
+            json={"current_password": REG["password"], "new_password": "NewStrong!Pass123"},
+        )
+    ).status_code == 401
+
+    # Wrong current password rejected
+    bad_cur = await client.post(
+        "/api/auth/change-password",
+        headers=h,
+        json={"current_password": "wrong-current-pw", "new_password": "NewStrong!Pass123"},
+    )
+    assert bad_cur.status_code == 400
+    assert "Current password incorrect" in bad_cur.json()["detail"]
+
+    # Short new password rejected
+    assert (
+        await client.post(
+            "/api/auth/change-password",
+            headers=h,
+            json={"current_password": REG["password"], "new_password": "short"},
+        )
+    ).status_code == 422
+
+    # Successful password change
+    res = await client.post(
+        "/api/auth/change-password",
+        headers=h,
+        json={"current_password": REG["password"], "new_password": "NewStrong!Pass123"},
+    )
+    assert res.status_code == 204
+
+    # Old password no longer works
+    assert (
+        await client.post(
+            "/api/auth/login", json={"email": email, "password": REG["password"]}
+        )
+    ).status_code == 401
+
+    # Old refresh token revoked
+    assert (
+        await client.post(
+            "/api/auth/refresh", json={"refresh_token": tokens["refresh_token"]}
+        )
+    ).status_code == 401
+
+    # New password works to log in
+    login_new = await client.post(
+        "/api/auth/login", json={"email": email, "password": "NewStrong!Pass123"}
+    )
+    assert login_new.status_code == 200
+
+
+
+async def test_refresh_token_cookie_flow(client, unique_email):
+    email = unique_email()
+    reg = await client.post("/api/auth/register", json={**REG, "email": email})
+    assert reg.status_code == 201
+    assert "set-cookie" in reg.headers
+    assert "refresh_token=" in reg.headers["set-cookie"]
+    assert "httponly" in reg.headers["set-cookie"].lower()
+
+    # Login sets cookie
+    login_res = await client.post(
+        "/api/auth/login", json={"email": email, "password": REG["password"]}
+    )
+    assert login_res.status_code == 200
+    assert "set-cookie" in login_res.headers
+    cookie_str = login_res.headers["set-cookie"]
+    assert "refresh_token=" in cookie_str
+
+    # Refresh using cookie without body
+    ref_res = await client.post("/api/auth/refresh")
+    assert ref_res.status_code == 200
+    ref_data = ref_res.json()
+    assert ref_data["access_token"] is not None
+    assert "refresh_token=" in ref_res.headers["set-cookie"]
+
+    # Logout clears cookie
+    logout_res = await client.post("/api/auth/logout")
+    assert logout_res.status_code == 204
+    assert "refresh_token="";" in logout_res.headers.get("set-cookie", "") or "max-age=0" in logout_res.headers.get("set-cookie", "").lower()
